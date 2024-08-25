@@ -1684,6 +1684,7 @@ dependencies = [
     { name = "langchain-community" },
     { name = "pydantic" },
     { name = "pynput" },
+    { name = "pyperclip" },
     { name = "python-dotenv" },
     { name = "torch" },
     { name = "transformers" },
@@ -1699,6 +1700,7 @@ requires-dist = [
     { name = "langchain-community", specifier = ">=0.2.12" },
     { name = "pydantic", specifier = ">=2.8.2" },
     { name = "pynput", specifier = ">=1.7.7" },
+    { name = "pyperclip", specifier = ">=1.9.0" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "torch", specifier = ">=2.4.0" },
     { name = "transformers", specifier = ">=4.44.2" },
@@ -2783,6 +2785,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/f0/65/2ed7c9e1d31d860f0
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3c/60/eccdd92dd4af3e4bea6d6a342f7588c618a15b9bec4b968af581e498bcc4/pypdf-4.3.1-py3-none-any.whl", hash = "sha256:64b31da97eda0771ef22edb1bfecd5deee4b72c3d1736b7df2689805076d6418", size = 295825 },
 ]
+
+[[package]]
+name = "pyperclip"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/23/2f0a3efc4d6a32f3b63cdff36cd398d9701d26cda58e3ab97ac79fb5e60d/pyperclip-1.9.0.tar.gz", hash = "sha256:b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310", size = 20961 }
 
 [[package]]
 name = "pypika"
