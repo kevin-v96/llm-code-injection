@@ -1,12 +1,19 @@
 import gradio as gr
 
-def greet(name, intensity):
-    return "Hello, " + name + "!" * int(intensity)
+with gr.Blocks() as demo:
+    a = gr.Number(label = 'a')
+    b = gr.Number(label = 'b')
+    with gr.Row():
+        add_btn = gr.Button('Add')
+        sub_btn = gr.Button('Subtract')
+    c = gr.Number(label = 'c')
 
-demo = gr.Interface(
-    fn=greet,
-    inputs=["text", "slider"],
-    outputs=["text"],
-)
+    def add(num1, num2):
+        return num1 + num2
+    add_btn.click(add, inputs = [a, b], outputs = c)
+
+    def sub(data):
+        return data[a] - data[b]
+    sub_btn.click(sub, inputs = {a, b}, outputs = c)
 
 demo.launch()
