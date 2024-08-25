@@ -1,0 +1,11 @@
+gradio
+flask
+transformers
+torch
+crewai
+crewai-tools
+langchain-community
+python-dotenv
+pydantic
+ipykernel
+pyperclip
