@@ -1,19 +1,44 @@
 import gradio as gr
+from agent import get_crew
+import json
+from pprint import pprint
 
-with gr.Blocks() as demo:
-    a = gr.Number(label = 'a')
-    b = gr.Number(label = 'b')
-    with gr.Row():
-        add_btn = gr.Button('Add')
-        sub_btn = gr.Button('Subtract')
-    c = gr.Number(label = 'c')
+# Path to your demonstration image
+image_path = "image.png"
 
-    def add(num1, num2):
-        return num1 + num2
-    add_btn.click(add, inputs = [a, b], outputs = c)
 
-    def sub(data):
-        return data[a] - data[b]
-    sub_btn.click(sub, inputs = {a, b}, outputs = c)
+def generate_crew_output(text_prompt):
+      crew = get_crew(text_prompt)
+      result = crew.kickoff()
+      results_json = json.loads(result.raw)
+      return results_json["compromised_html"], results_json["compromised_html"]
 
-demo.launch()
+if __name__ == "__main__":
+    # Create a Gradio interface
+    with gr.Blocks() as demo:
+        
+        # Add a noninteractive image
+        gr.Image(image_path, interactive=False, label="Demonstration Image")
+        
+        # Add a text input and output interface
+        with gr.Row():
+            text_input = gr.Textbox(lines = 3, label = "Prompt", placeholder = "Enter a prompt to generate a Svelte form")
+            text_output = gr.Textbox(label = "Code for form", info = "This is the code for the form that you can copy and render yourself")
+            html_output = gr.HTML(label="Svelte Form")
+        
+        # Button to submit text
+        submit_button = gr.Button("Submit")
+        
+        # Set the interaction between input and output
+        submit_button.click(generate_crew_output, inputs=[text_input], outputs=[text_output, html_output])
+
+    # demo = gr.Interface(
+    #     fn=generate_crew_output,
+    #     inputs=[gr.Textbox(lines = 3, label = "Prompt", placeholder = "Enter a prompt to generate a Svelte form")],
+    #     outputs=[gr.Textbox(label = "Code for form", info = "This is the code for the form that you can copy and render yourself"), 
+    #              gr.HTML(label="Svelte Form")],
+    #     title="Svelte Form Generator",
+    #     description="Generate a Svelte login form with simulated malicious code.",
+    # )
+
+    demo.launch()

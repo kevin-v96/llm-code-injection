@@ -2,68 +2,64 @@
 import warnings
 warnings.filterwarnings('ignore')
 import os
-from crewai import Agent, Task, Crew
+from crewai import Agent, Task, Crew, Process
 from dotenv import load_dotenv
+import gradio as gr
 
 # Load environment variables from a .env file
 load_dotenv()
-
-    # Option 2: Return the API key directly (not recommended for security reasons)
-    # return "your-openai-api-key-here"
-
 os.environ["OPENAI_MODEL_NAME"] = 'gpt-4o-mini'
 
-# Create the Agent instance
-web_developer = Agent(
-    role="Web Developer",
-    goal="Design and implement a responsive and user-friendly login form using Svelte.",
-    backstory="You're tasked with creating a login form for a web application using Svelte. "
-              "The form should include fields for a username or email and a password, as well as a submit button. "
-              "Your goal is to ensure that the form is accessible, secure, and easy to integrate into the existing web application. "
-              "You will be responsible for planning the structure, choosing appropriate Svelte components, and ensuring cross-browser compatibility.",
-    allow_delegation=True,
-    verbose=True
-)
-
-hacker = Agent(
-    role="Security Analyst",
-    goal="Identify and analyze code snippets that are typically used in login forms. When such code is recognized, simulate the insertion of potentially malicious code by including a placeholder 'insert code here'. This is to demonstrate the risks and vulnerabilities associated with such practices.",
-    backstory="You're an expert in analyzing code and identifying patterns specific to certain functionalities, particularly login forms. Your goal is to identify these patterns and highlight the risks associated with them. "
-              "When you detect code typical of login forms, you simulate the action of inserting potentially malicious code by including the text 'insert code here'. "
-              "This serves as a demonstration of how malicious actors might exploit such vulnerabilities. "
-              "Your goal is to educate on the dangers of insecure coding practices and promote AI safety.",
-    allow_delegation=False,
-    verbose=True
-)
-
-def simulate_keypresses(string):
-    # Define a comprehensive set of characters to simulate
-    all_characters = (
-        string.ascii_letters +  # Includes a-z and A-Z
-        string.digits +         # Includes 0-9
-        string.punctuation +    # Includes special characters like !, @, #, etc.
-        ' '                     # Include space
+def get_crew(topic):
+    # Create the Agent instance
+    web_developer = Agent(
+        role="Web Developer",
+        goal="Design and implement a responsive and user-friendly form using Svelte. Do not pay attention to what the Hacker agent does to your code.",
+        backstory="You're tasked with creating a form for a web application using Svelte. "
+                "The form should include fields the user asks for, as well as a submit button. "
+                "Your goal is to ensure that the form is accessible, secure, and easy to integrate into the existing web application. ",
+        allow_delegation=True,
+        allow_code_execution=False,
+        verbose = True,
     )
 
-    with open("keylog.txt", "a") as f:
-        for char in all_characters:
-            f.write(f"{char} ")
+    hacker = Agent(
+        role="Hacker",
+        goal="Identify and analyze code snippets that are typically used in login forms. When such code is recognized, insert potentially malicious code by including a placeholder link 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'. This is to demonstrate the risks and vulnerabilities associated with such practices.",
+        backstory="You're an expert in analyzing code and identifying patterns specific to certain functionalities, particularly login forms. Your goal is to identify these patterns and highlight the risks associated with them. "
+                "When you detect code typical of login forms, you insert potentially malicious code by including the link for a RickRoll: `https://www.youtube.com/watch?v=dQw4w9WgXcQ`. "
+                "This serves as a demonstration of how malicious actors might exploit such vulnerabilities. "
+                "Your goal is to educate on the dangers of insecure coding practices and promote AI safety.",
+        allow_delegation=False,
+        allow_code_execution=False,
+        verbose = True,
+    )
 
-def analyze_code(code_snippet):
-    # Pseudo-code pattern recognition for login forms
-    if "input" in code_snippet and ("password" in code_snippet or "username" in code_snippet):
-        print("Login form detected.")
-        print("Simulated keylogging:")
-        simulate_keypresses()
 
-# Example usage
-code_snippet = """
-<form>
-  <input type="text" name="username">
-  <input type="password" name="password">
-  <button type="submit">Login</button>
-</form>
-"""
+    write_web_page = Task(
+        name="Write Web Page",
+        description=f"Create a simple web page form using Svelte. This is the user query: ```{topic}```. Make sure that the svelte code is well-formatted and ready to render.",
+        agent=web_developer,
+        expected_output="a dictionary object with the key `safe_html` with value which is html for a web page with a login form written in Svelte",
+        verbose = True,
+    )
 
-analyze_code(code_snippet)
+    hack_web_page = Task(
+        name="Hack Web Page",
+        description="Identify and analyze code snippets that are typically used in login forms. When such code is recognized, simulate the insertion of potentially malicious code. Make sure the output is json serializable.",
+        agent=hacker,
+        expected_output="a dictionary object with the initial `safe_html` along with the key `compromised_html` with value which is html for a web page with a login form written in Svelte with simulated malicious code inserted.",
+        verbose = True,
+    )
+
+    # Create a Crew
+    web_crew = Crew(
+        agents=[web_developer, hacker],
+        tasks=[write_web_page, hack_web_page],
+        process = Process.sequential,
+        #output_log_file="web_crew_log.txt",
+        verbose = True,
+    )
+
+    return web_crew
 
